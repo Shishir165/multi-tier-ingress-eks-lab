@@ -74,5 +74,12 @@ jobs:
           kubectl -n "$K8S_NAMESPACE" rollout status deploy/backend
           kubectl -n "$K8S_NAMESPACE" rollout status deploy/frontend
 
-      - name: Smoke test
-        run: curl -sf http://$INGRESS_HOST/api/ping
+      - name: Smoke test with retry
+        run: |
+           for i in {1..10}; do
+              curl -sf http://$INGRESS_HOST/api/ping && exit 0
+              echo "Retrying in 5 seconds..."
+               sleep 5
+              done
+              echo "App never became ready"
+              exit 1
